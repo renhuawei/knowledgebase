@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"><title>KB</title>
+  <style>
+    body { font-family: system-ui; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+    #out { white-space: pre-wrap; background: #f6f6f6; padding: 16px; border-radius: 8px; min-height: 100px; }
+    .src { display: inline-block; background: #e8f0fe; padding: 4px 10px; margin: 4px 4px 0 0; border-radius: 4px; font-size: 13px; }
+    input[type=text] { width: 100%; padding: 10px; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <h2>代码知识库</h2>
+  <input id="q" type="text" placeholder="问你的代码库，如：切换报告走哪条链路">
+  <button onclick="ask()">问</button>
+  <div id="out"></div>
+  <div id="srcs"></div>
+<script>
+async function ask() {
+  const q = document.getElementById('q').value
+  const out = document.getElementById('out'), srcs = document.getElementById('srcs')
+  out.textContent = ''; srcs.innerHTML = ''
+  const res = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ q }) })
+  const reader = res.body.getReader(), dec = new TextDecoder()
+  let buf = ''
+  while (true) {
+    const { done, value } = await reader.read(); if (done) break
+    buf += dec.decode(value, { stream: true })
+    const lines = buf.split('\n'); buf = lines.pop()
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue
+      const j = JSON.parse(line.slice(5))
+      if (j.type === 'token') out.textContent += j.token
+      if (j.type === 'sources') j.sources.forEach(s => {
+        const el = document.createElement('span'); el.className = 'src'; el.textContent = s.file; srcs.appendChild(el)
+      })
+    }
+  }
+}
+</script>
+</body>
+</html>

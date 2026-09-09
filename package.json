@@ -1,0 +1,12 @@
+{
+  "name": "knowledgebase",
+  "type": "module",
+  "scripts": {
+    "index": "node ingest.mjs",
+    "serve": "node server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}

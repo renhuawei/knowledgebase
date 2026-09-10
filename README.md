@@ -54,7 +54,7 @@ brew services start ollama        # 开机自启并后台运行
 
 ```bash
 ollama pull bge-m3        # 向量化模型（中英混排好）
-ollama pull qwen2.5:7b    # 回答模型（8G 可跑；省内存可换 qwen2.5:3b）
+ollama pull qwen3:4b      # 回答模型（8G 内存友好；可换 qwen2.5:7b / qwen2.5:3b）
 ```
 
 ### 3. 安装项目依赖
@@ -70,7 +70,7 @@ npm i
 
 ```bash
 CODE_ROOT=/path/to/your/code/src
-CHAT_MODEL=qwen2.5:7b
+CHAT_MODEL=qwen3:4b
 EMBED_MODEL=bge-m3
 ```
 

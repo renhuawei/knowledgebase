@@ -3,7 +3,7 @@ import cors from 'cors'
 import { join } from 'node:path'
 import config from './config.mjs'
 import { search } from './search.mjs'
-import { chatStream } from './ollama.mjs'
+import { chatStream } from './chat.mjs'
 import { buildPrompt } from './prompt.mjs'
 
 const app = express()
@@ -33,7 +33,7 @@ app.post('/api/ask', async (req, res) => {
 
   let answer = ''
   try {
-    await chatStream([{ role: 'user', content: prompt }], config.chatModel, config.ollama, token => {
+    await chatStream([{ role: 'user', content: prompt }], token => {
       answer += token
       res.write(`data: ${JSON.stringify({ type: 'token', token })}\n\n`)
     })

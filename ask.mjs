@@ -1,6 +1,5 @@
-import config from './config.mjs'
 import { search } from './search.mjs'
-import { chatStream } from './ollama.mjs'
+import { chatStream } from './chat.mjs'
 import { buildPrompt } from './prompt.mjs'
 
 const q = process.argv.slice(2).join(' ').trim()
@@ -13,7 +12,7 @@ try {
   const sources = await search(q)
   const prompt = buildPrompt({ q, sources })
 
-  await chatStream([{ role: 'user', content: prompt }], config.chatModel, config.ollama, token => {
+  await chatStream([{ role: 'user', content: prompt }], token => {
     process.stdout.write(token)
   })
 

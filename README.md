@@ -25,7 +25,8 @@ kb/
 ├── package.json
 ├── config.mjs        # 配置（路径/模型/端口，读 .env）
 ├── .env              # 本地环境变量（被 git 忽略）
-├── ollama.mjs        # embed + 流式 chat 封装
+├── ollama.mjs        # 本地向量化 embed
+├── chat.mjs          # 流式生成（本地 Ollama / 云端 OpenAI 兼容）
 ├── chunk.mjs         # 遍历 + 函数级分块
 ├── prompt.mjs        # RAG prompt 拼接（server/CLI 共用）
 ├── ingest.mjs        # 增量建索引（buildIndex 可复用）
@@ -54,7 +55,7 @@ brew services start ollama        # 开机自启并后台运行
 
 ```bash
 ollama pull bge-m3        # 向量化模型（中英混排好）
-ollama pull qwen3:4b      # 回答模型（8G 内存友好；可换 qwen2.5:7b / qwen2.5:3b）
+ollama pull qwen3:4b      # 本地回答模型；若生成端走云端则可跳过
 ```
 
 ### 3. 安装项目依赖
@@ -66,12 +67,21 @@ npm i
 
 ### 4. 配置 `.env`
 
-复制一份 `.env`，填入你的代码目录和模型：
+复制一份 `.env`，填入代码目录和模型。生成端默认走本地 Ollama，也可切云端（OpenAI 兼容）：
 
 ```bash
 CODE_ROOT=/path/to/your/code/src
-CHAT_MODEL=qwen3:4b
 EMBED_MODEL=bge-m3
+
+# 本地生成（默认）
+CHAT_PROVIDER=ollama
+CHAT_MODEL=qwen3:4b
+
+# 切云端（示例 DeepSeek，取消注释并填 key）
+# CHAT_PROVIDER=openai
+# CHAT_MODEL=deepseek-chat
+# CHAT_BASE_URL=https://api.deepseek.com/v1
+# CHAT_API_KEY=sk-xxx
 ```
 
 ## 使用

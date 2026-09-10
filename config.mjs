@@ -14,9 +14,14 @@ if (existsSync(envFile)) {
 export default {
   root: process.env.CODE_ROOT || './src',   // 代码目录（可用环境变量 CODE_ROOT 覆盖）
   indexFile: process.env.INDEX_FILE || './index.json',
-  embedModel: process.env.EMBED_MODEL || 'bge-m3',   // 中文好
-  chatModel: process.env.CHAT_MODEL || 'qwen2.5:7b', // 8G 可跑 7b；省内存改 3b
-  ollama: 'http://localhost:11434',
+  embedModel: process.env.EMBED_MODEL || 'bge-m3',   // 向量化模型（本地）
+  ollama: process.env.OLLAMA_URL || 'http://localhost:11434',   // 本地 Ollama 地址（向量化用）
+  chat: {
+    provider: process.env.CHAT_PROVIDER || 'ollama',   // 'ollama' | 'openai'
+    model: process.env.CHAT_MODEL || 'qwen3:4b',
+    baseUrl: process.env.CHAT_BASE_URL || 'http://localhost:11434',   // openai 时填 https://xxx/v1
+    apiKey: process.env.CHAT_API_KEY || '',
+  },
   port: process.env.PORT || 3001,
   topK: 6,
   chunk: { size: 800, overlap: 200 },

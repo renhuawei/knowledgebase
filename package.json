@@ -3,6 +3,8 @@
   "type": "module",
   "scripts": {
     "index": "node ingest.mjs",
+    "ask": "node ask.mjs",
+    "watch": "node watch.mjs",
     "serve": "node server.mjs"
   },
   "dependencies": {

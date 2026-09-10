@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs'
 import config from './config.mjs'
 import { embed } from './ollama.mjs'
 
-const docs = JSON.parse(readFileSync(config.indexFile, 'utf8'))
+const data = JSON.parse(readFileSync(config.indexFile, 'utf8'))
+const docs = Array.isArray(data) ? data : data.docs
 
 function cosine(a, b) {
   let dot = 0, na = 0, nb = 0

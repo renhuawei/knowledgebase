@@ -4,23 +4,50 @@
   <meta charset="utf-8"><title>KB</title>
   <style>
     body { font-family: system-ui; max-width: 760px; margin: 40px auto; padding: 0 20px; }
-    #out { white-space: pre-wrap; background: #f6f6f6; padding: 16px; border-radius: 8px; min-height: 100px; }
-    .src { display: inline-block; background: #e8f0fe; padding: 4px 10px; margin: 4px 4px 0 0; border-radius: 4px; font-size: 13px; }
-    input[type=text] { width: 100%; padding: 10px; font-size: 15px; }
+    h2 { display: flex; justify-content: space-between; align-items: center; }
+    #chat .q { font-weight: 600; margin-top: 16px; }
+    #chat .a { background: #f6f6f6; padding: 12px 16px; border-radius: 8px; margin: 8px 0; white-space: pre-wrap; }
+    .src { display: inline-block; background: #e8f0fe; color: #1a73e8; padding: 3px 10px; margin: 4px 4px 0 0; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .bar { display: flex; gap: 8px; margin-top: 12px; }
+    input[type=text] { flex: 1; padding: 10px; font-size: 15px; }
+    button { padding: 10px 14px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>代码知识库</h2>
-  <input id="q" type="text" placeholder="问你的代码库，如：切换报告走哪条链路">
-  <button onclick="ask()">问</button>
-  <div id="out"></div>
-  <div id="srcs"></div>
+  <h2>代码知识库 <button onclick="reset()">清空对话</button></h2>
+  <div id="chat"></div>
+  <div class="bar">
+    <input id="q" type="text" placeholder="问你的代码库，如：切换报告走哪条链路">
+    <button onclick="ask()">发送</button>
+  </div>
 <script>
+const SESSION = 'default'
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag)
+  if (cls) e.className = cls
+  if (text) e.textContent = text
+  return e
+}
+
 async function ask() {
-  const q = document.getElementById('q').value
-  const out = document.getElementById('out'), srcs = document.getElementById('srcs')
-  out.textContent = ''; srcs.innerHTML = ''
-  const res = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ q }) })
+  const input = document.getElementById('q')
+  const q = input.value.trim()
+  if (!q) return
+  input.value = ''
+
+  const chat = document.getElementById('chat')
+  chat.appendChild(el('div', 'q', '问：' + q))
+  const a = el('div', 'a', '')
+  const srcs = el('div', 'srcs')
+  chat.appendChild(a)
+  chat.appendChild(srcs)
+
+  const res = await fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q, session: SESSION }),
+  })
   const reader = res.body.getReader(), dec = new TextDecoder()
   let buf = ''
   while (true) {
@@ -30,13 +57,30 @@ async function ask() {
     for (const line of lines) {
       if (!line.startsWith('data:')) continue
       const j = JSON.parse(line.slice(5))
-      if (j.type === 'token') out.textContent += j.token
+      if (j.type === 'token') a.textContent += j.token
+      if (j.type === 'error') a.textContent += '\n[错误] ' + j.error
       if (j.type === 'sources') j.sources.forEach(s => {
-        const el = document.createElement('span'); el.className = 'src'; el.textContent = s.file; srcs.appendChild(el)
+        const label = s.startLine ? `${s.file}:${s.startLine}` : s.file
+        const e = el('span', 'src', label)
+        e.title = `${s.file}:${s.startLine}-${s.endLine}`
+        e.onclick = () => window.location.href = `vscode://file/${s.abs}:${s.startLine}`
+        srcs.appendChild(e)
       })
     }
   }
+  chat.scrollTop = chat.scrollHeight
 }
+
+async function reset() {
+  await fetch('/api/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session: SESSION }),
+  })
+  document.getElementById('chat').innerHTML = ''
+}
+
+document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') ask() })
 </script>
 </body>
 </html>

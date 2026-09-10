@@ -13,11 +13,11 @@ if (existsSync(envFile)) {
 
 export default {
   root: process.env.CODE_ROOT || './src',   // 代码目录（可用环境变量 CODE_ROOT 覆盖）
-  indexFile: './index.json',
-  embedModel: 'bge-m3',                  // 中文好
-  chatModel: 'qwen2.5:3b',
+  indexFile: process.env.INDEX_FILE || './index.json',
+  embedModel: process.env.EMBED_MODEL || 'bge-m3',   // 中文好
+  chatModel: process.env.CHAT_MODEL || 'qwen2.5:7b', // 8G 可跑 7b；省内存改 3b
   ollama: 'http://localhost:11434',
-  port: 3001,
+  port: process.env.PORT || 3001,
   topK: 6,
   chunk: { size: 800, overlap: 200 },
 }
